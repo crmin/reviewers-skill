@@ -36,10 +36,8 @@ This project contains the following files:
 Copy the block below and give it directly to the coding agent you want to use.
 
 ```text
-Read https://github.com/crmin/reviewers-skill/blob/main/INSTALL.md and install the reviewers skill and subagents.
+Read https://raw.githubusercontent.com/crmin/reviewers-skill/refs/heads/main/INSTALL.md and install the reviewers skill and subagents.
 ```
-
-For the detailed agent installation procedure, see `https://github.com/crmin/reviewers-skill/blob/main/INSTALL.md`.
 
 ### For Humans
 
