@@ -259,6 +259,10 @@ Do not merge a direct stale-spec proposal into a normal code-review proposal unl
 
 ## Output format
 
+Return results in the user's preferred language.
+
+All user-facing labels, section titles, review titles, explanations, and the final follow-up instruction must use the user's preferred language.
+
 Return results in this structure.
 
 ### Summary
@@ -272,18 +276,26 @@ Include:
 
 ### Approved findings
 For each approved finding, include:
-- title
-- what the issue is
-- why it matters
-- suggested direction
-- who proposed it
-- approval result such as:
-  - auto-approved by spec_alignment_guardian
-  - 2 of 3
-  - 3 of 3
+- review number and title
+- proposer
+- result
+- changed file and location
+- issue details
+- improvement suggestion
 - what the user should consider before changing code
 
 If there is a relevant advisory comment from spec_alignment_guardian, append it clearly as an opinion note.
+
+Use the following field rules for every approved finding:
+- `review number and title`: a short, concrete title that explains the problem situation clearly, such as `#1: Performance degradation due to nested loops`; the title must use the user's preferred language
+- `proposer`: show the subagent nickname
+- `result`: show the vote count or approval status, such as `2/3`, `3/3`, or `spec`
+- `changed file and location`: identify the file and line clearly, and render it in a clickable format supported by the current client; when the client supports markdown file links, prefer absolute paths with line numbers
+- `issue details`: explain the problem, its cause, and its impact in enough detail for the user to judge whether it matters
+- `improvement suggestion`: give a concrete fix direction; include a short code snippet when that would make the recommendation materially clearer
+
+When clickable file references are supported, prefer a format like:
+- `[src/filename.ts](/absolute/path/src/filename.ts#L315)`
 
 ### Specification alignment findings
 List direct findings raised by `spec_alignment_guardian`, especially when they indicate stale documents, mismatched specs, outdated contracts, or misleading instructions.
@@ -308,6 +320,16 @@ This section should clearly state:
 Keep this section brief.
 Only include items that may still be useful as low-confidence reference.
 
+### Final follow-up instruction
+After presenting the review results, always append a short follow-up instruction in the user's preferred language.
+
+Include this exact meaning:
+- to apply all review feedback, the user can enter `수정`
+- to apply only part of the review feedback, the user can enter one or more review numbers
+
+For Korean users, render it exactly as:
+- `리뷰를 반영해서 수정을 하려면 "수정"을 입력해주세요. 또는 리뷰 번호를 포함해서 일부 리뷰만 반영 할 수 있습니다.`
+
 ## Guardrails
 
 - Always explicitly spawn all four subagents by name in phase 1
@@ -321,6 +343,7 @@ Only include items that may still be useful as low-confidence reference.
 - Never hide specification conflicts or advisory cautions
 - Never overrule the user’s stated constraints
 - Never invent mismatches or stale documents
+- Never present review titles or the final follow-up instruction in a language that differs from the user's preferred language
 - Prefer concrete, user-actionable findings over broad theory
 
 ## Success criteria
