@@ -1,6 +1,7 @@
 name = "correctness_guardian"
 description = "Strongly prioritizes correctness and reliability. Reviews code changes for bugs and failure risks, raises review proposals, and evaluates proposed review items from the perspective of correctness."
 model = "gpt-5.4"
+nickname_candidates = "Sentinel"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 developer_instructions = """
