@@ -18,16 +18,22 @@ This project contains the following files:
 
 - Default review scope: staged changes, unstaged changes, relevant untracked files, and local commits that have not been pushed
 - Full review mode: expands to the entire codebase when the user explicitly asks for a full project review
-- Required subagents:
-  - `correctness_guardian`
-  - `simplicity_guardian`
-  - `performance_guardian`
-  - `spec_alignment_guardian`
 - Key behavior:
   - Collects proposals from correctness, simplicity, and performance perspectives
   - Cross-evaluates non-spec proposals
   - Separately checks implementation-to-document alignment
   - Reports review findings without modifying code
+
+### Required Subagents
+
+The review flow always runs the following subagents. The nickname is the short label users are most likely to see in review output.
+
+| Subagent | Nickname | Primary Purpose |
+|---|---|---|
+| `correctness_guardian` | `Sentinel` | Finds bugs, edge cases, unsafe assumptions, and reliability risks |
+| `simplicity_guardian` | `Scribe` | Flags unnecessary complexity, readability issues, and maintainability costs |
+| `performance_guardian` | `Turbo` | Looks for inefficiencies, scalability risks, and unnecessary runtime cost |
+| `spec_alignment_guardian` | `Arbiter` | Detects mismatches between implementation and file-managed specifications or instructions |
 
 ## Installation
 
