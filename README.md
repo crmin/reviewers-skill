@@ -45,7 +45,7 @@ The review flow always runs the following subagents. The nickname is the short l
 | Review Role | Codex | Claude Code | OpenCode | Nickname | Primary Purpose |
 |---|---|---|---|---|---|
 | Correctness reviewer | `correctness_guardian` | `correctness-guardian` | `correctness-guardian` | `Sentinel` | Finds bugs, edge cases, unsafe assumptions, and reliability risks |
-| Simplicity reviewer | `simplicity_guardian` | `simplicity-guardian` | `simplicity-guardian` | `Scribe` | Flags unnecessary complexity, readability issues, and maintainability costs |
+| Simplicity reviewer | `simplicity_guardian` | `simplicity-guardian` | `simplicity-guardian` | `Scribe` | Flags unnecessary complexity, readability issues, duplicated logic, dead code, and maintainability costs |
 | Performance reviewer | `performance_guardian` | `performance-guardian` | `performance-guardian` | `Turbo` | Looks for inefficiencies, scalability risks, and unnecessary runtime cost |
 | Specification reviewer | `spec_alignment_guardian` | `spec-alignment-guardian` | `spec-alignment-guardian` | `Arbiter` | Detects mismatches between implementation and file-managed specifications or instructions |
 
