@@ -80,23 +80,26 @@ This skill should not blindly follow any one subagent’s bias.
 
 ## Required subagents
 
-This skill must explicitly spawn all of the following subagents by name.
+This skill must explicitly spawn all of the following review roles using the platform-native subagent identifiers.
 
-Required subagents:
-- correctness_guardian
-- simplicity_guardian
-- performance_guardian
-- spec_alignment_guardian
+| Review role | Codex identifier | Claude Code identifier | OpenCode identifier | Nickname |
+|---|---|---|---|---|
+| Correctness reviewer | `correctness_guardian` | `correctness-guardian` | `correctness-guardian` | `Sentinel` |
+| Simplicity reviewer | `simplicity_guardian` | `simplicity-guardian` | `simplicity-guardian` | `Scribe` |
+| Performance reviewer | `performance_guardian` | `performance-guardian` | `performance-guardian` | `Turbo` |
+| Specification reviewer | `spec_alignment_guardian` | `spec-alignment-guardian` | `spec-alignment-guardian` | `Arbiter` |
+
+Use the identifier that matches the current runtime.
 
 Important:
-- Codex subagents run only when they are explicitly spawned by name
+- subagents run only when they are explicitly spawned by their exact configured identifier
 - do not refer to them indirectly
 - do not skip any required subagent
 - do not merge their responsibilities into one generic review call
 
 ## Phase 1 - Spawn subagents to review and raise proposals
 
-Explicitly spawn each required subagent by name.
+Explicitly spawn each required review role by its current-platform identifier.
 
 Each subagent receives the same review context:
 - all local unpushed code changes, or full project code if full review was explicitly requested
@@ -122,16 +125,20 @@ Each proposal must include:
 The metadata field must contain the exact subagent name that raised the proposal.
 
 Example values:
-- metadata.proposed_by: correctness_guardian
-- metadata.proposed_by: simplicity_guardian
-- metadata.proposed_by: performance_guardian
-- metadata.proposed_by: spec_alignment_guardian
+- Codex: `metadata.proposed_by: correctness_guardian`
+- Codex: `metadata.proposed_by: simplicity_guardian`
+- Codex: `metadata.proposed_by: performance_guardian`
+- Codex: `metadata.proposed_by: spec_alignment_guardian`
+- Claude Code or OpenCode: `metadata.proposed_by: correctness-guardian`
+- Claude Code or OpenCode: `metadata.proposed_by: simplicity-guardian`
+- Claude Code or OpenCode: `metadata.proposed_by: performance-guardian`
+- Claude Code or OpenCode: `metadata.proposed_by: spec-alignment-guardian`
 
 A subagent may raise multiple proposals.
 
-## Special rule for spec_alignment_guardian proposals
+## Special rule for specification reviewer proposals
 
-Any review proposal raised by `spec_alignment_guardian`:
+Any review proposal raised by the specification reviewer:
 - must not be evaluated by other subagents
 - is always considered approved for reporting
 - should normally be framed as a request to inspect and update stale or mismatched specification documents, unless the context clearly indicates that the implementation should instead be brought back into alignment with the documented behavior
@@ -142,16 +149,13 @@ These proposals bypass consensus voting.
 
 After collecting all proposals, iterate through them one by one.
 
-For each proposal raised by:
-- correctness_guardian
-- simplicity_guardian
-- performance_guardian
+For each proposal raised by the correctness reviewer, simplicity reviewer, or performance reviewer:
 
 do the following:
 
 1. Read `metadata.proposed_by`
 2. Treat the proposing subagent as already having approved the proposal
-3. Explicitly spawn the other two non-spec reviewer subagents by name
+3. Explicitly spawn the other two non-spec reviewer subagents by their current-platform identifiers
 4. Ask each of those two subagents to evaluate the proposal and return:
    - approve
    - reject
@@ -163,9 +167,9 @@ The proposing subagent must not re-evaluate its own proposal.
 
 ## Phase 3 - Specification-alignment advisory evaluation
 
-For every proposal not raised by `spec_alignment_guardian`, explicitly spawn `spec_alignment_guardian` and ask it to evaluate whether the proposal conflicts with file-managed specifications or instructions.
+For every proposal not raised by the specification reviewer, explicitly spawn the specification reviewer by its current-platform identifier and ask it to evaluate whether the proposal conflicts with file-managed specifications or instructions.
 
-The result from `spec_alignment_guardian` in this phase:
+The result from the specification reviewer in this phase:
 - does not change the vote count
 - does not participate in consensus
 - does not block approval by itself
@@ -182,7 +186,7 @@ Interpretation:
 
 ## Consensus rules
 
-Each proposal from correctness_guardian, simplicity_guardian, or performance_guardian starts with one implicit approval from its proposer.
+Each proposal from the correctness reviewer, simplicity reviewer, or performance reviewer starts with one implicit approval from its proposer.
 
 ### 1 of 3
 Ignore the proposal.
@@ -217,13 +221,13 @@ No additional balancing judgment is required.
 There are two different kinds of spec-related handling in this skill.
 
 ### 1. Direct stale-spec findings
-If `spec_alignment_guardian` raises its own proposal about stale or mismatched documentation:
+If the specification reviewer raises its own proposal about stale or mismatched documentation:
 - always approve it for reporting
 - do not send it through voting
 - present it as a documentation or specification alignment finding
 
 ### 2. Advisory comments on other approved findings
-If `spec_alignment_guardian` rejects another subagent’s proposal during advisory evaluation:
+If the specification reviewer rejects another subagent’s proposal during advisory evaluation:
 - do not change the vote count
 - do not automatically discard the proposal
 - attach the advisory opinion to the final result shown to the user
@@ -253,7 +257,7 @@ If merged, preserve:
 - all agreeing voting subagents
 - all rejecting voting subagents
 - all useful rejection reasons
-- any advisory opinion from spec_alignment_guardian
+- any advisory opinion from the specification reviewer
 
 Do not merge a direct stale-spec proposal into a normal code-review proposal unless they are truly the same issue.
 
@@ -284,7 +288,7 @@ For each approved finding, include:
 - improvement suggestion
 - what the user should consider before changing code
 
-If there is a relevant advisory comment from spec_alignment_guardian, append it clearly as an opinion note.
+If there is a relevant advisory comment from the specification reviewer, append it clearly as an opinion note.
 
 Use the following field rules for every approved finding:
 - `review number and title`: a short, concrete title that explains the problem situation clearly, such as `#1: Performance degradation due to nested loops`; the title must use the user's preferred language
@@ -298,7 +302,7 @@ When clickable file references are supported, prefer a format like:
 - `[src/filename.ts](/absolute/path/src/filename.ts#L315)`
 
 ### Specification alignment findings
-List direct findings raised by `spec_alignment_guardian`, especially when they indicate stale documents, mismatched specs, outdated contracts, or misleading instructions.
+List direct findings raised by the specification reviewer, especially when they indicate stale documents, mismatched specs, outdated contracts, or misleading instructions.
 
 For each item, include:
 - title
@@ -308,11 +312,11 @@ For each item, include:
 - why the user should review it
 
 ### Specification advisory notes
-For approved findings raised by other subagents, include any relevant advisory opinion from `spec_alignment_guardian`.
+For approved findings raised by other subagents, include any relevant advisory opinion from the specification reviewer.
 
 This section should clearly state:
 - the proposal title
-- whether spec_alignment_guardian approved or rejected it
+- whether the specification reviewer approved or rejected it
 - the reason
 - the related document or instruction source when known
 
@@ -332,16 +336,16 @@ For Korean users, render it exactly as:
 
 ## Guardrails
 
-- Always explicitly spawn all four subagents by name in phase 1
-- Always explicitly spawn the two non-proposing voting subagents by name for non-spec proposals
-- Always explicitly spawn spec_alignment_guardian for advisory evaluation of non-spec proposals
+- Always explicitly spawn all four review roles by their current-platform identifiers in phase 1
+- Always explicitly spawn the two non-proposing voting subagents by their current-platform identifiers for non-spec proposals
+- Always explicitly spawn the specification reviewer for advisory evaluation of non-spec proposals
 - Never assume a subagent ran unless it was explicitly spawned
 - Never let a proposal evaluate itself twice
-- Never let spec_alignment_guardian affect the vote count for another subagent’s proposal
-- Never send a spec_alignment_guardian proposal through normal voting
+- Never let the specification reviewer affect the vote count for another subagent's proposal
+- Never send a specification reviewer proposal through normal voting
 - Never treat approval as permission to edit code
 - Never hide specification conflicts or advisory cautions
-- Never overrule the user’s stated constraints
+- Never overrule the user's stated constraints
 - Never invent mismatches or stale documents
 - Never present review titles or the final follow-up instruction in a language that differs from the user's preferred language
 - Prefer concrete, user-actionable findings over broad theory
@@ -351,9 +355,9 @@ For Korean users, render it exactly as:
 This skill is successful when:
 - all four named subagents are explicitly spawned during proposal generation
 - every proposal records the proposing subagent in metadata
-- proposals from correctness_guardian, simplicity_guardian, and performance_guardian are evaluated by the other two voting subagents
-- proposals from spec_alignment_guardian are always approved and never voted on
-- spec_alignment_guardian evaluates other proposals only as an advisory specification-alignment check
+- proposals from the correctness reviewer, simplicity reviewer, and performance reviewer are evaluated by the other two voting subagents
+- proposals from the specification reviewer are always approved and never voted on
+- the specification reviewer evaluates other proposals only as an advisory specification-alignment check
 - advisory specification comments are surfaced to the user without changing vote totals
 - approved findings are reported without editing code
 - the user retains final decision authority

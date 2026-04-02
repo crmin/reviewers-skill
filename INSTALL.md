@@ -1,61 +1,59 @@
 # reviewers Installation Guide for Coding Agents
 
-This document is written for coding agents. Its purpose is to install the `reviewers` skill and its required subagent definitions into the correct local paths for each supported agent.
+This document is written for coding agents. Its purpose is to install the `reviewers` skill and the matching platform-native subagent definitions into the correct local paths for Codex, Claude Code, or OpenCode.
 
 ## 1. What to Install
 
 - Skill name: `reviewers`
-- Source files:
+- Shared skill file:
   - `/path/to/reviewers/SKILL.md`
-  - `/path/to/reviewers/subagents/correctness_guardian.toml`
-  - `/path/to/reviewers/subagents/performance_guardian.toml`
-  - `/path/to/reviewers/subagents/simplicity_guardian.toml`
-  - `/path/to/reviewers/subagents/spec_alignment_guardian.toml`
+- Platform-specific subagent sources:
+  - Codex: `/path/to/reviewers/subagents/codex/`
+  - Claude Code: `/path/to/reviewers/subagents/claude/`
+  - OpenCode: `/path/to/reviewers/subagents/opencode/`
 
-## 2. Target Paths
+Install `SKILL.md` into the selected agent's skill path and install the matching subagent files into the selected agent's subagent path.
 
-Install `SKILL.md` into the skill path and install each subagent TOML file into the subagent path.
+## 2. Subagent Formats and File Names
 
-| Agent Name | Skills Path | Subagent Path |
+| Agent Name | Source Directory | Installed Files |
+|---|---|---|
+| Codex | `subagents/codex/` | `correctness_guardian.toml`, `performance_guardian.toml`, `simplicity_guardian.toml`, `spec_alignment_guardian.toml` |
+| Claude Code | `subagents/claude/` | `correctness-guardian.md`, `performance-guardian.md`, `simplicity-guardian.md`, `spec-alignment-guardian.md` |
+| OpenCode | `subagents/opencode/` | `correctness-guardian.md`, `performance-guardian.md`, `simplicity-guardian.md`, `spec-alignment-guardian.md` |
+
+Do not mix formats across platforms.
+
+## 3. Target Paths
+
+| Agent Name | Skill Path | Subagent Path |
 |---|---|---|
 | Codex | `~/.codex/skills/reviewers/` | `~/.codex/agents/` |
-| Claude Code | `~/.claude/skills/reviewers/` | `~/.claude/agents/` |
-| OpenCode | `~/.opencode/skills/reviewers/` | `~/.opencode/agents/` |
+| Claude Code | `~/.claude/skills/reviewers/` or `.claude/skills/reviewers/` | `~/.claude/agents/` or `.claude/agents/` |
+| OpenCode | `~/.config/opencode/skills/reviewers/` or `.opencode/skills/reviewers/` | `~/.config/opencode/agents/` or `.opencode/agents/` |
 
-## 3. Preconditions
+Use project-local paths only when you intentionally want the installation scoped to one repository.
 
-- A POSIX shell is available
-- `mkdir`, `cp`, `ls`, and `find` are available
-- The local path to the downloaded repository is known
+## 4. Recommended Installation Script
 
-## 4. Required Layout
+If you have a local checkout of this repository, prefer the bundled installer:
 
-The installed files must end up in this shape:
-
-```text
-<skills path>/reviewers/
-└── SKILL.md
-
-<subagent path>/
-├── correctness_guardian.toml
-├── performance_guardian.toml
-├── simplicity_guardian.toml
-└── spec_alignment_guardian.toml
+```bash
+cd /path/to/reviewers
+./install.sh codex
+./install.sh claude
+./install.sh opencode
 ```
 
-File mapping:
+For Claude Code and OpenCode project-local installation:
 
-| Source | Destination |
-|---|---|
-| `/path/to/reviewers/SKILL.md` | `<skills path>/reviewers/SKILL.md` |
-| `/path/to/reviewers/subagents/correctness_guardian.toml` | `<subagent path>/correctness_guardian.toml` |
-| `/path/to/reviewers/subagents/performance_guardian.toml` | `<subagent path>/performance_guardian.toml` |
-| `/path/to/reviewers/subagents/simplicity_guardian.toml` | `<subagent path>/simplicity_guardian.toml` |
-| `/path/to/reviewers/subagents/spec_alignment_guardian.toml` | `<subagent path>/spec_alignment_guardian.toml` |
+```bash
+cd /path/to/reviewers
+./install.sh claude --project /path/to/project
+./install.sh opencode --project /path/to/project
+```
 
-Do not place the subagent TOML files inside the skills directory. They must be installed into the agent's subagent path.
-
-## 5. Installation Commands
+## 5. Manual Installation Commands
 
 Replace `/path/to/reviewers` with the real local path of this repository before running the commands.
 
@@ -64,40 +62,89 @@ Replace `/path/to/reviewers` with the real local path of this repository before 
 ```bash
 mkdir -p ~/.codex/skills/reviewers ~/.codex/agents
 cp /path/to/reviewers/SKILL.md ~/.codex/skills/reviewers/SKILL.md
-cp /path/to/reviewers/subagents/*.toml ~/.codex/agents/
-ls -R ~/.codex/skills/reviewers
-ls -R ~/.codex/agents
+cp /path/to/reviewers/subagents/codex/*.toml ~/.codex/agents/
+find ~/.codex/skills/reviewers -maxdepth 2 -type f | sort
+find ~/.codex/agents -maxdepth 1 -type f | sort
 ```
 
-### Claude Code
+### Claude Code, global install
 
 ```bash
 mkdir -p ~/.claude/skills/reviewers ~/.claude/agents
 cp /path/to/reviewers/SKILL.md ~/.claude/skills/reviewers/SKILL.md
-cp /path/to/reviewers/subagents/*.toml ~/.claude/agents/
-ls -R ~/.claude/skills/reviewers
-ls -R ~/.claude/agents
+cp /path/to/reviewers/subagents/claude/*.md ~/.claude/agents/
+find ~/.claude/skills/reviewers -maxdepth 2 -type f | sort
+find ~/.claude/agents -maxdepth 1 -type f | sort
 ```
 
-### OpenCode
+### Claude Code, project-local install
 
 ```bash
-mkdir -p ~/.opencode/skills/reviewers ~/.opencode/agents
-cp /path/to/reviewers/SKILL.md ~/.opencode/skills/reviewers/SKILL.md
-cp /path/to/reviewers/subagents/*.toml ~/.opencode/agents/
-ls -R ~/.opencode/skills/reviewers
-ls -R ~/.opencode/agents
+mkdir -p /path/to/project/.claude/skills/reviewers /path/to/project/.claude/agents
+cp /path/to/reviewers/SKILL.md /path/to/project/.claude/skills/reviewers/SKILL.md
+cp /path/to/reviewers/subagents/claude/*.md /path/to/project/.claude/agents/
+find /path/to/project/.claude/skills/reviewers -maxdepth 2 -type f | sort
+find /path/to/project/.claude/agents -maxdepth 1 -type f | sort
 ```
 
-## 6. Verification
+### OpenCode, global install
 
-After installation, the following files must exist:
+```bash
+mkdir -p ~/.config/opencode/skills/reviewers ~/.config/opencode/agents
+cp /path/to/reviewers/SKILL.md ~/.config/opencode/skills/reviewers/SKILL.md
+cp /path/to/reviewers/subagents/opencode/*.md ~/.config/opencode/agents/
+find ~/.config/opencode/skills/reviewers -maxdepth 2 -type f | sort
+find ~/.config/opencode/agents -maxdepth 1 -type f | sort
+```
 
-- `~/.codex/skills/reviewers/SKILL.md` or the equivalent skills path for the selected agent
-- `correctness_guardian.toml` in the selected agent's subagent path
-- `performance_guardian.toml` in the selected agent's subagent path
-- `simplicity_guardian.toml` in the selected agent's subagent path
-- `spec_alignment_guardian.toml` in the selected agent's subagent path
+### OpenCode, project-local install
+
+```bash
+mkdir -p /path/to/project/.opencode/skills/reviewers /path/to/project/.opencode/agents
+cp /path/to/reviewers/SKILL.md /path/to/project/.opencode/skills/reviewers/SKILL.md
+cp /path/to/reviewers/subagents/opencode/*.md /path/to/project/.opencode/agents/
+find /path/to/project/.opencode/skills/reviewers -maxdepth 2 -type f | sort
+find /path/to/project/.opencode/agents -maxdepth 1 -type f | sort
+```
+
+## 6. Required Installed Layout
+
+All installations must contain the shared skill file:
+
+```text
+<skill path>/reviewers/
+└── SKILL.md
+```
+
+Codex subagent layout:
+
+```text
+<subagent path>/
+├── correctness_guardian.toml
+├── performance_guardian.toml
+├── simplicity_guardian.toml
+└── spec_alignment_guardian.toml
+```
+
+Claude Code and OpenCode subagent layout:
+
+```text
+<subagent path>/
+├── correctness-guardian.md
+├── performance-guardian.md
+├── simplicity-guardian.md
+└── spec-alignment-guardian.md
+```
+
+Do not place subagent files inside the skill directory.
+
+## 7. Verification
+
+After installation, verify:
+
+- `SKILL.md` exists in the selected skill path
+- the four matching subagent files exist in the selected subagent path
+- the file names exactly match the source files for that platform
 
 Example verification commands:
 
@@ -106,9 +153,9 @@ find ~/.codex/skills/reviewers -maxdepth 2 -type f | sort
 find ~/.codex/agents -maxdepth 1 -type f | sort
 ```
 
-If you are installing for Claude Code or OpenCode, replace the paths accordingly.
+Swap the paths for Claude Code or OpenCode as needed.
 
-## 7. Usage Prompts
+## 8. Usage Prompts
 
 After installation, the user can invoke the skill with prompts such as:
 
@@ -124,17 +171,17 @@ Review my working tree and unpushed commits with the reviewers skill.
 Run a full project review with the reviewers skill.
 ```
 
-## 8. Troubleshooting
+## 9. Troubleshooting
 
 ### The subagents are not found
 
-- Verify that the four TOML files were copied into the subagent path
+- Verify that the subagent files were copied from the correct platform directory
 - Verify that only `SKILL.md` was not installed by itself
-- Verify that the file names exactly match the originals
+- Verify that the installed file names exactly match the source files
 
 ### The skill is not detected
 
-- Verify that the skill was installed in the correct skills path
+- Verify that the skill was installed in the correct skill path
 - Restart the agent or reload its skill list if needed
 - Check for path typos
 
